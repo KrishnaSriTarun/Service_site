@@ -15,8 +15,13 @@ export async function POST(req: Request) {
             });
 
             return Response.json(booking);
-      } catch (error) {
-            console.log(error);
-            return Response.json({ error: "Failed to create booking" }, { status: 500 });
+
+      } catch (error: any) {
+            console.error("Prisma Error: ", error);
+            return Response.json(
+                  { error: error.message, code: error.code, meta: error.meta },
+                  { status: 500 }
+            );
       }
 }
+

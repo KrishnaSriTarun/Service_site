@@ -1,25 +1,32 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useUser } from "@clerk/nextjs";
 
 export default function ProviderDashboard() {
+      const { user, isLoaded } = useUser();
       const [providerId, setProviderId] = useState<string | null>(null);
-      const [bookings, setBookings] = useState([]);
+      const [bookings, setBookings] = useState<any[]>([]);
 
       useEffect(() => {
-            // Read from localStorage only on client
-            const id = localStorage.getItem("userId");
-            setProviderId(id);
-      }, []);
+            if (isLoaded && user) {
+                  setProviderId(user.id);
+            }
+      }, [isLoaded, user]);
 
       useEffect(() => {
             if (!providerId) return; // Wait until providerId loads
 
             async function load() {
                   try {
-                        const res = await fetch(`/api/provider/bookings/${providerId}`);
+                        const res = await fetch(`/api/providers/bookings/${providerId}`);
                         const data = await res.json();
-                        setBookings(data);
+                        if (Array.isArray(data)) {
+                              setBookings(data);
+                        } else {
+                              console.error("API returned error:", data);
+                              setBookings([]);
+                        }
                   } catch (err) {
                         console.error("Error fetching provider bookings:", err);
                   }

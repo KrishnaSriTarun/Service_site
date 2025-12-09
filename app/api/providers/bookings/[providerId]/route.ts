@@ -2,10 +2,10 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET(
       req: Request,
-      { params }: { params: { providerId: string } }
+      { params }: { params: Promise<{ providerId: string }> }
 ) {
       try {
-            const providerId = params.providerId;
+            const { providerId } = await params;
 
             const bookings = await prisma.booking.findMany({
                   where: { providerId },

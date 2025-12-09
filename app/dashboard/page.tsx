@@ -3,28 +3,35 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Inter } from "next/font/google";
+import { useUser } from "@clerk/nextjs";
 
 const inter = Inter({ subsets: ['latin'] });
 
 export default function DashboardPage() {
-      const [bookings, setBookings] = useState([]);
+      const { user, isLoaded } = useUser();
+      const [bookings, setBookings] = useState<any[]>([]);
       const [loading, setLoading] = useState(true);
 
-      console.log("bookings",bookings);
-      
-
       useEffect(() => {
-            const uid = localStorage.getItem("userId");
-            if (!uid) {
+            if (!isLoaded) return;
+
+            if (!user) {
                   setLoading(false);
                   return;
             }
+
+            const uid = user.id;
 
             async function load() {
                   try {
                         const res = await fetch(`/api/bookings/user/${uid}`);
                         const data = await res.json();
-                        setBookings(data);
+                        if (Array.isArray(data)) {
+                              setBookings(data);
+                        } else {
+                              console.error("API returned error:", data);
+                              setBookings([]);
+                        }
                   } catch (err) {
                         console.log("Error loading bookings:", err);
                   } finally {
@@ -33,7 +40,7 @@ export default function DashboardPage() {
             }
 
             load();
-      }, []);
+      }, [isLoaded, user]);
 
       if (loading) {
             return <p className="p-4 text-center">Loading...</p>;
@@ -70,10 +77,10 @@ export default function DashboardPage() {
 
                                                 <span
                                                       className={`px-3 py-1 text-sm rounded-full ${b.status === "pending"
-                                                                  ? "bg-yellow-200 text-yellow-800"
-                                                                  : b.status === "completed"
-                                                                        ? "bg-green-200 text-green-800"
-                                                                        : "bg-gray-200 text-gray-700"
+                                                            ? "bg-yellow-200 text-yellow-800"
+                                                            : b.status === "completed"
+                                                                  ? "bg-green-200 text-green-800"
+                                                                  : "bg-gray-200 text-gray-700"
                                                             }`}
                                                 >
                                                       {b.status}

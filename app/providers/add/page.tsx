@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useUser } from "@clerk/nextjs";
 
 export default function AddProviderPage() {
+      const { user } = useUser();
       const [form, setForm] = useState({
             name: "",
             category: "",
@@ -11,6 +13,12 @@ export default function AddProviderPage() {
             userId: "",
             photoUrl: "",
       });
+
+      useEffect(() => {
+            if (user) {
+                  setForm(prev => ({ ...prev, userId: user.id }));
+            }
+      }, [user]);
 
       const [loading, setLoading] = useState(false);
       const [message, setMessage] = useState("");
@@ -44,7 +52,7 @@ export default function AddProviderPage() {
                         category: "",
                         experience: "",
                         price: "",
-                        userId: "",
+                        userId: user?.id || "",
                         photoUrl: "",
                   });
             } else {
@@ -110,15 +118,14 @@ export default function AddProviderPage() {
                               required
                         />
 
-                        <input
+                        {/* <input
                               type="text"
                               name="userId"
-                              placeholder="User ID (temporary)"
+                              placeholder="User ID"
                               value={form.userId}
-                              onChange={handleChange}
-                              className="w-full p-3 border rounded"
-                              required
-                        />
+                              readOnly
+                              className="w-full p-3 border rounded bg-gray-100 cursor-not-allowed"
+                        /> */}
 
                         <input
                               type="text"

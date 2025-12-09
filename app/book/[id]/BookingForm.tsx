@@ -1,17 +1,22 @@
 "use client";
 
-import { useState } from "react";
-import { ObjectId } from 'bson';
+import { useState, useEffect } from "react";
+import { useUser } from "@clerk/nextjs";
 
 export default function BookingForm({ providerId, price }: any) {
-
-      const fakeCustomerId = new ObjectId().toString();
+      const { user } = useUser();
       const [form, setForm] = useState({
             address: "",
             description: "",
             price: price,
-            customerId: fakeCustomerId,
+            customerId: "",
       });
+
+      useEffect(() => {
+            if (user) {
+                  setForm(prev => ({ ...prev, customerId: user.id }));
+            }
+      }, [user]);
 
       const [message, setMessage] = useState("");
 
@@ -27,7 +32,7 @@ export default function BookingForm({ providerId, price }: any) {
 
             if (res.ok) {
                   setMessage("Booking Successful!");
-                  setForm({ address: "", description: "", price, customerId: "TEMP_USER_ID" });
+                  setForm({ address: "", description: "", price, customerId: user?.id || "" });
             } else {
                   setMessage(data.error || "Failed to book");
             }

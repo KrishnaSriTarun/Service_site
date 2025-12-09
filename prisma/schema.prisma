@@ -7,22 +7,28 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ------------------- USER -------------------
+//
+// ==================== USER (Stored in DB) ====================
+//
+
 model User {
-  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  id        String    @id @map("_id") // Clerk ID
   name      String
   phone     String?
   email     String?
   role      String    @default("customer")
   createdAt DateTime  @default(now())
-
+  
   bookings  Booking[] @relation("UserBookings")
 }
 
-// ------------------- PROVIDER -------------------
+//
+// ==================== PROVIDER (Stored in DB) ====================
+//
+
 model Provider {
   id         String    @id @default(auto()) @map("_id") @db.ObjectId
-  userId     String    @db.ObjectId
+  userId     String
   name       String
   category   String
   experience Int?
@@ -34,15 +40,17 @@ model Provider {
   bookings   Booking[] @relation("ProviderBookings")
 }
 
-// ------------------- BOOKING -------------------
+//
+// ==================== BOOKING (Relation to User & Provider) ====================
+//
+
 model Booking {
   id          String    @id @default(auto()) @map("_id") @db.ObjectId
 
-  customerId  String    @db.ObjectId
+  customerId  String
   providerId  String    @db.ObjectId
 
-  // relations
-  customer    User      @relation("UserBookings", fields: [customerId], references: [id])
+  user        User      @relation("UserBookings", fields: [customerId], references: [id])
   provider    Provider  @relation("ProviderBookings", fields: [providerId], references: [id])
 
   status      String    @default("pending")
